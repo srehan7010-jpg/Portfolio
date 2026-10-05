@@ -118,7 +118,7 @@ footer{padding:24px 5%;display:flex;justify-content:space-between;flex-wrap:wrap
 <a href="#skills" onclick="closeMenu()">Skills</a>
 <a href="#work" onclick="closeMenu()">Work</a>
 <a href="#about" onclick="closeMenu()">About</a>
-<a href="#contact" onclick="closeMenu()">Contact</a>
+<a href="#contact-form" onclick="closeMenu()">Contact</a>
 </div>
 
 <div class="hero" id="home">
@@ -229,12 +229,12 @@ footer{padding:24px 5%;display:flex;justify-content:space-between;flex-wrap:wrap
 <div class="c-item"><b>STATUS</b><p>● Available Now</p></div>
 </div>
 </div>
-<form class="form" onsubmit="handleSend(event)">
-<input type="text" placeholder="Your Name" required>
-<input type="email" placeholder="Email Address" required>
-<textarea rows="4" placeholder="Tell me about your project..." required></textarea>
-<button class="btn" style="background:#000;color:#fff;width:100%;justify-content:center;">Send Message →</button>
-<p id="done" style="display:none;text-align:center;font-size:12px;font-weight:700;margin-top:8px;">✓ Message sent — will reply in 2 hours.</p>
+<form class="form" id="contact-form" action="https://formspree.io/f/YOUR_FORMSPREE_ID" method="POST">
+    <input type="text" name="name" placeholder="Your Name" required>
+    <input type="email" name="email" placeholder="Email Address" required>
+    <textarea name="message" rows="4" placeholder="Tell me about your project..." required></textarea>
+    <button type="submit" class="btn" id="submit-btn" style="background:#000;color:#fff;width:100%;justify-content:center;">Send Message →</button>
+    <p id="done" style="display:none;text-align:center;font-size:12px;font-weight:700;margin-top:8px;color:#000;">✓ Message sent — will reply in 2 hours.</p>
 </form>
 </div>
 </section>
@@ -244,7 +244,48 @@ footer{padding:24px 5%;display:flex;justify-content:space-between;flex-wrap:wrap
 <script>
 const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in'); e.target.querySelectorAll('.linebar span').forEach(s=>s.style.width=s.dataset.w);}})}, {threshold:0.15});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
-function handleSend(e){e.preventDefault();document.getElementById('done').style.display='block';e.target.reset();setTimeout(()=>document.getElementById('done').style.display='none',4000);}
+const contactForm = document.getElementById('contact-form');
+const statusMessage = document.getElementById('done');
+const submitBtn = document.getElementById('submit-btn');
+
+contactForm.addEventListener("submit", async function(event) {
+    event.preventDefault(); // Stop page refresh
+    
+    submitBtn.innerText = "Sending...";
+    submitBtn.disabled = true;
+
+    const data = new FormData(event.target);
+    
+    // Send data to Formspree
+    fetch(event.target.action, {
+        method: contactForm.method,
+        body: data,
+        headers: {
+            'Accept': 'application/json'
+        }
+    }).then(response => {
+        if (response.ok) {
+            statusMessage.style.display = "block";
+            statusMessage.style.color = "green";
+            statusMessage.innerText = "✓ Message sent successfully!";
+            contactForm.reset();
+        } else {
+            statusMessage.style.display = "block";
+            statusMessage.style.color = "red";
+            statusMessage.innerText = "Oops! There was a problem.";
+        }
+        submitBtn.innerText = "Send Message →";
+        submitBtn.disabled = false;
+        
+        // Hide message after 5 seconds
+        setTimeout(() => { statusMessage.style.display = 'none' }, 5000);
+    }).catch(error => {
+        statusMessage.style.display = "block";
+        statusMessage.style.color = "red";
+        statusMessage.innerText = "Error: Could not connect to server.";
+        submitBtn.disabled = false;
+    });
+});
 
 const hamburger=document.getElementById('hamburger');
 const mobileMenu=document.getElementById('mobileMenu');
