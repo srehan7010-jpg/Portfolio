@@ -258,7 +258,11 @@ document.getElementById('contactForm').addEventListener('submit', async e => {
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify(data)
     });
-    if (!r.ok) throw new Error();
+    const res = await r.json();
+    console.log(res);
+    if (res.success !== 'true' && res.success !== true) {
+    throw new Error(res.message || 'Failed');
+}
     done.textContent = '✓ Message sent — will reply soon.';
     f.reset();
   } catch {
